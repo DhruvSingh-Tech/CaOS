@@ -175,7 +175,7 @@ export interface Exam {
   startTime: string; // "10:00 AM"
   endTime: string;   // "11:30 AM"
   room: string;
-  syllabusCovered: string;
+  // syllabusCovered: string;
   totalMarks: number;
 }
 

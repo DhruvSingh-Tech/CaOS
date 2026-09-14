@@ -230,6 +230,10 @@ class SupabaseDataService {
             parsed.resources && parsed.resources.length > 0
               ? parsed.resources
               : initial.resources,
+          exams:
+            parsed.exams && parsed.exams.length > 0
+              ? parsed.exams
+              : initial.exams,
           driveHub: parsed.driveHub || initial.driveHub,
         };
       }

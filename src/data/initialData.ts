@@ -405,8 +405,87 @@ export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
 // Zero prefilled dummy assignments (clean state)
 export const INITIAL_ASSIGNMENTS: Assignment[] = [];
 
-// Zero prefilled dummy exams (clean state)
-export const INITIAL_EXAMS: Exam[] = [];
+// Official Minor-1 Examination Date Sheet (Aug-Dec 2026) for USAR AR-1 B2
+export const INITIAL_EXAMS: Exam[] = [
+  {
+    id: 'exam-minor1-math',
+    subjectId: 'sub-ar-101',
+    subjectName: 'Engineering Mathematics-I (AR-101)',
+    title: 'Minor-1 Examination: Engineering Mathematics-I',
+    examType: 'mid_sem',
+    examDate: '2026-09-21',
+    startTime: '10:30 AM',
+    endTime: '12:00 PM',
+    room: 'A-201 / Exam Hall',
+    // syllabusCovered: 'Unit 1: Calculus I & Extreme values, Mean Value Theorem, Integration, Partial differentiation',
+    totalMarks: 30,
+  },
+  {
+    id: 'exam-minor1-cprog',
+    subjectId: 'sub-ar-103',
+    subjectName: 'Programming for Problem Solving using C (AR-103)',
+    title: 'Minor-1 Examination: C Programming',
+    examType: 'mid_sem',
+    examDate: '2026-09-22',
+    startTime: '10:30 AM',
+    endTime: '12:00 PM',
+    room: 'A-201 / Exam Hall',
+    // syllabusCovered: 'Unit 1 & Unit 2: Algorithms, Structure of C, Number Systems, Control Structures (if/switch, loops)',
+    totalMarks: 30,
+  },
+  {
+    id: 'exam-minor1-evs',
+    subjectId: 'sub-ar-121',
+    subjectName: 'Environmental Studies (AR-121)',
+    title: 'Minor-1 Examination: Environmental Studies',
+    examType: 'mid_sem',
+    examDate: '2026-09-23',
+    startTime: '10:30 AM',
+    endTime: '12:00 PM',
+    room: 'A-103-CR / Exam Hall',
+    // syllabusCovered: 'Unit 1: Ecosystems & Biodiversity (Structure, function, food chains, hotspots, conservation)',
+    totalMarks: 30,
+  },
+  {
+    id: 'exam-minor1-mech',
+    subjectId: 'sub-ar-117',
+    subjectName: 'Engineering Mechanics (AR-117)',
+    title: 'Minor-1 Examination: Engineering Mechanics',
+    examType: 'mid_sem',
+    examDate: '2026-09-24',
+    startTime: '10:30 AM',
+    endTime: '12:00 PM',
+    room: 'A-201 / Exam Hall',
+    // syllabusCovered: 'Unit 1 & Unit 2: Force systems, Varignon’s theorem, Free Body Diagrams, Trusses, Laws of Dry Friction',
+    totalMarks: 30,
+  },
+  {
+    id: 'exam-minor1-comm',
+    subjectId: 'sub-ar-105',
+    subjectName: 'Communication Skills (AR-105)',
+    title: 'Minor-1 Examination: Communication Skills',
+    examType: 'mid_sem',
+    examDate: '2026-09-25',
+    startTime: '10:30 AM',
+    endTime: '12:00 PM',
+    room: 'A-103-CR / Exam Hall',
+    // syllabusCovered: 'Unit 1 & Unit 2: Functional Grammar, Sentence Structure, Professional Emails & Workplace Writing',
+    totalMarks: 30,
+  },
+  {
+    id: 'exam-minor1-analog',
+    subjectId: 'sub-ar-119',
+    subjectName: 'Analog Electronics (AR-119)',
+    title: 'Minor-1 Examination: Analog Electronics',
+    examType: 'mid_sem',
+    examDate: '2026-09-26',
+    startTime: '10:30 AM',
+    endTime: '12:00 PM',
+    room: 'A-201 / Exam Hall',
+    // syllabusCovered: 'Unit 1 & Unit 2: P-N Junction, Rectifiers, Clippers/Clampers, BJT configurations & Biasing circuits',
+    totalMarks: 30,
+  },
+];
 
 // Zero prefilled dummy doubts (clean state)
 export const INITIAL_DOUBTS: Doubt[] = [];
@@ -426,20 +505,20 @@ export const INITIAL_ATTENDANCE: AttendanceRecord[] = USAR_SUBJECTS.map((sub) =>
 
 // Default Active Class Polls
 export const INITIAL_POLLS: Poll[] = [
-  {
-    id: 'poll-math-extra',
-    question: 'Should we schedule the Mathematics-I Extra Tutorial on Wednesday at 3:00 PM?',
-    description: 'Dr. Arti Singh has offered an extra problem-solving session before Minor Exams.',
-    options: [
-      { id: 0, text: 'Yes, Wednesday 3:00 PM works best', votes: 28 },
-      { id: 1, text: 'Prefer Thursday 4:00 PM instead', votes: 12 },
-      { id: 2, text: 'No extra session needed', votes: 3 },
-    ],
-    expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-    createdBy: 'Dhruv Singh (CR)',
-    createdAt: 'Yesterday',
-    status: 'active',
-  },
+  // {
+  //   id: 'poll-math-extra',
+  //   question: 'Should we schedule the Mathematics-I Extra Tutorial on Wednesday at 3:00 PM?',
+  //   description: 'Dr. Arti Singh has offered an extra problem-solving session before Minor Exams.',
+  //   options: [
+  //     { id: 0, text: 'Yes, Wednesday 3:00 PM works best', votes: 28 },
+  //     { id: 1, text: 'Prefer Thursday 4:00 PM instead', votes: 12 },
+  //     { id: 2, text: 'No extra session needed', votes: 3 },
+  //   ],
+  //   expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+  //   createdBy: 'Dhruv Singh (CR)',
+  //   createdAt: 'Yesterday',
+  //   status: 'active',
+  // },
 ];
 
 // Real USAR Faculty teaching AR-1 B2

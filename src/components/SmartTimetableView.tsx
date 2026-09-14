@@ -407,42 +407,43 @@ export function SmartTimetableView({
       {/* Header & Main Controls */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               Class Schedule & Timetable
             </h1>
-            <Badge variant="outline" className="font-mono text-xs">
-              {activeWeekSchedule.versionTag}
-            </Badge>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-blue-950/70 text-blue-300 border border-blue-800/60 shrink-0">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+              {(activeWeekSchedule.versionTag.match(/^v\d+/i)?.[0] || `v${activeWeekSchedule.weekNumber}`).toUpperCase()} • Week {selectedWeekNum}
+            </span>
           </div>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-            Weekly timetable versioning, date-by-date class alterations, and official PDF matrix reader.
+            Weekly timetable versioning, date-by-date class alterations, and official matrix reader.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Mode Switcher */}
-          <div className="flex items-center p-1 rounded-lg bg-zinc-900 border border-zinc-800">
+          <div className="flex items-center p-1 rounded-xl bg-zinc-900 border border-zinc-800 shadow-sm shrink-0">
             <button
               onClick={() => setViewMode('agenda')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 viewMode === 'agenda'
-                  ? 'bg-zinc-100 text-zinc-950 font-semibold shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
-              <CalendarIcon className="h-3.5 w-3.5" />
-              <span>Daily Class Log</span>
+              <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
+              <span>Daily Log</span>
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 viewMode === 'calendar'
-                  ? 'bg-zinc-100 text-zinc-950 font-semibold shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
-              <Columns className="h-3.5 w-3.5" />
+              <Columns className="h-3.5 w-3.5 text-indigo-400" />
               <span>Week Grid</span>
             </button>
           </div>
@@ -451,9 +452,9 @@ export function SmartTimetableView({
             variant="outline"
             size="sm"
             onClick={onNavigateToChangelog}
-            className="text-xs"
+            className="text-xs border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 shrink-0"
           >
-            <History className="h-3.5 w-3.5 mr-1 text-zinc-400" />
+            <History className="h-3.5 w-3.5 mr-1.5 text-zinc-400" />
             Audit Ledger
           </Button>
 
@@ -463,27 +464,22 @@ export function SmartTimetableView({
               variant="default"
               size="sm"
               onClick={handleStartUpload}
-              className="text-xs font-semibold shadow-sm"
+              className="text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm shrink-0"
             >
               <UploadCloud className="h-3.5 w-3.5 mr-1.5" />
-              Upload TT for Week {selectedWeekNum}
+              Upload TT (Week {selectedWeekNum})
             </Button>
           ) : !user ? (
             <Button
               variant="outline"
               size="sm"
               onClick={() => onOpenAuthModal && onOpenAuthModal()}
-              className="text-xs font-medium text-amber-300 border-amber-900/60 bg-amber-950/20 hover:bg-amber-950/40"
+              className="text-xs font-medium text-amber-300 border-amber-900/60 bg-amber-950/20 hover:bg-amber-950/40 shrink-0"
             >
               <Lock className="h-3.5 w-3.5 mr-1.5 text-amber-400" />
               Sign In to Update
             </Button>
-          ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900/70 text-xs text-zinc-400 font-medium">
-              <ShieldCheck className="h-3.5 w-3.5 text-zinc-500" />
-              <span>CR Protected</span>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
 
