@@ -38,7 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isConfigured = isSupabaseConfigured();
 
   // Load user profile from Supabase
-  const fetchProfile = async (userId: string, userEmail?: string): Promise<UserProfile | null> => {
+  const fetchProfile = async (
+    userId: string,
+    userEmail?: string,
+    userMetadata?: any
+  ): Promise<UserProfile | null> => {
     if (!supabase) return null;
     try {
       const { data, error } = await supabase
@@ -56,14 +60,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const initialRole: UserRole = isSuperAdminEmail ? 'admin' : 'student';
 
         const savedGroup = (typeof window !== 'undefined' ? localStorage.getItem('caos_user_lab_group') : null) as any;
+        const displayName =
+          userMetadata?.full_name ||
+          userMetadata?.name ||
+          (userEmail ? userEmail.split('@')[0] : 'Student');
+        const avatarUrl =
+          userMetadata?.avatar_url ||
+          userMetadata?.picture ||
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
+
         const newProfile: UserProfile = {
           id: userId,
           email: userEmail || '',
-          name: userEmail ? userEmail.split('@')[0] : 'Student',
+          name: displayName,
           role: initialRole,
           rollNo: `26AR${Math.floor(10 + Math.random() * 89)}`,
           classBatch: 'USAR AR-1 B2',
-          avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+          avatarUrl,
           labGroup: savedGroup || 'Group B2-A',
         };
 
@@ -75,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           roll_no: newProfile.rollNo,
           class_id: '32a7c369-f80a-4a14-8afd-de3c6bd5cee0',
           avatar_url: newProfile.avatarUrl,
+          lab_group: newProfile.labGroup,
         });
 
         return newProfile;
@@ -138,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = async () => {
     if (session?.user?.id) {
-      const profile = await fetchProfile(session.user.id, session.user.email);
+      const profile = await fetchProfile(session.user.id, session.user.email, session.user.user_metadata);
       if (profile) setUser(profile);
     }
   };
@@ -155,11 +169,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       if (session?.user) {
         dataService.setCurrentUserId(session.user.id);
-        const profile = await fetchProfile(session.user.id, session.user.email);
+        const profile = await fetchProfile(session.user.id, session.user.email, session.user.user_metadata);
         setUser(
           profile || {
             id: session.user.id,
-            name: session.user.email?.split('@')[0] || 'Student',
+            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Student',
             email: session.user.email,
             role: 'student',
             classBatch: 'USAR AR-1 B2',
@@ -179,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(newSession);
         if (newSession?.user) {
           dataService.setCurrentUserId(newSession.user.id);
-          const profile = await fetchProfile(newSession.user.id, newSession.user.email);
+          const profile = await fetchProfile(newSession.user.id, newSession.user.email, newSession.user.user_metadata);
           setUser(profile);
           await refreshRoster();
         } else {
