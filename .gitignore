@@ -37,3 +37,4 @@ dist-ssr
 supabase/.temp/
 supabase/.branches/
 supabase/*.sql
+.vercel

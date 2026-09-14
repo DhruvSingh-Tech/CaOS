@@ -212,8 +212,8 @@ export function AttendanceView({ attendance: _legacyAttendance }: AttendanceView
             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               Attendance Intelligence
             </h1>
-            <Badge variant="outline" className="font-mono text-xs border-zinc-700">
-              Odd Sem 2026-27 (w.e.f. Aug 3)
+            <Badge variant="outline" className="font-mono text-xs border-zinc-700 bg-zinc-900/80 text-zinc-300">
+              Aug 3, 2026 – Today ({todayStr})
             </Badge>
           </div>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1">
@@ -328,7 +328,7 @@ export function AttendanceView({ attendance: _legacyAttendance }: AttendanceView
             <span className="text-xs text-zinc-400 font-medium">Class Sessions</span>
           </div>
           <p className="text-[11px] text-zinc-400 pt-1">
-            Calculated day-by-day since Aug 3, 2026 (Week {currentWeekNumber})
+            Calculated from Aug 3, 2026 till today ({todayStr})
           </p>
         </div>
 

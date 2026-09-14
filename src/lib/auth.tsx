@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { UserProfile, UserRole } from '../types';
 import { getSupabaseClient, isSupabaseConfigured } from './supabase';
+import { dataService } from '../services/dataService';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -145,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!supabase) {
       setUser(null);
+      dataService.setCurrentUserId(null);
       setLoading(false);
       return;
     }
@@ -152,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
+        dataService.setCurrentUserId(session.user.id);
         const profile = await fetchProfile(session.user.id, session.user.email);
         setUser(
           profile || {
@@ -165,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await refreshRoster();
       } else {
         setUser(null);
+        dataService.setCurrentUserId(null);
         setAllStudents([]);
       }
       setLoading(false);
@@ -174,11 +178,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (_event, newSession) => {
         setSession(newSession);
         if (newSession?.user) {
+          dataService.setCurrentUserId(newSession.user.id);
           const profile = await fetchProfile(newSession.user.id, newSession.user.email);
           setUser(profile);
           await refreshRoster();
         } else {
           setUser(null);
+          dataService.setCurrentUserId(null);
           setAllStudents([]);
         }
         setLoading(false);

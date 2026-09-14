@@ -157,6 +157,9 @@ class SupabaseDataService {
 
   public setCurrentUserId(userId: string | null) {
     this.currentUserId = userId;
+    if (userId) {
+      this.pullSessionAttendance();
+    }
   }
 
   public async ensureClassId(): Promise<string> {
@@ -339,6 +342,11 @@ class SupabaseDataService {
             { event: '*', schema: 'public', table: 'daily_class_overrides' },
             () => this.pullDailyOverrides()
           )
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'student_attendance' },
+            () => this.pullSessionAttendance()
+          )
           .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
               console.log('⚡ Connected to CaOS Supabase Realtime');
@@ -370,6 +378,7 @@ class SupabaseDataService {
       this.pullQuickLinks(),
       this.pullWeeklySchedules(),
       this.pullDailyOverrides(),
+      this.pullSessionAttendance(),
     ]);
 
     this.saveLocalState();
@@ -1467,6 +1476,60 @@ class SupabaseDataService {
     return this.state.sessionAttendance;
   }
 
+  public async pullSessionAttendance(): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+
+    let userId = this.currentUserId;
+    if (!userId) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          userId = user.id;
+          this.currentUserId = user.id;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    if (!userId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('student_attendance')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.warn('Error pulling student attendance:', error);
+        return;
+      }
+
+      if (data && Array.isArray(data)) {
+        if (!this.state.sessionAttendance) {
+          this.state.sessionAttendance = {};
+        }
+        data.forEach((row: any) => {
+          const sessionId = `session_${row.date}_${row.slot_id}`;
+          this.state.sessionAttendance[sessionId] = {
+            id: sessionId,
+            date: row.date,
+            slotId: row.slot_id,
+            subjectId: row.subject_id,
+            subjectName: row.subject_name,
+            status: row.status as SessionAttendanceStatus,
+            markedAt: row.updated_at || row.created_at,
+            notes: row.notes || undefined,
+          };
+        });
+        this.saveLocalState();
+        this.notify();
+      }
+    } catch (err) {
+      console.warn('Failed to pull student attendance from Supabase:', err);
+    }
+  }
+
   public async markSessionAttendance(
     date: string,
     slotId: string,
@@ -1497,21 +1560,39 @@ class SupabaseDataService {
 
     // Sync to Supabase if connected
     const supabase = getSupabaseClient();
-    if (supabase && this.currentUserId) {
-      try {
-        await supabase.from('student_attendance').upsert({
-          id: `${this.currentUserId}_${date}_${slotId}`,
-          user_id: this.currentUserId,
-          date,
-          slot_id: slotId,
-          subject_id: subjectId,
-          subject_name: subjectName,
-          status,
-          notes: notes || null,
-          updated_at: new Date().toISOString(),
-        });
-      } catch (err) {
-        console.warn('Could not sync session attendance to Supabase:', err);
+    if (supabase) {
+      let userId = this.currentUserId;
+      if (!userId) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            userId = user.id;
+            this.currentUserId = user.id;
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      if (userId) {
+        try {
+          const { error } = await supabase.from('student_attendance').upsert({
+            id: `${userId}_${date}_${slotId}`,
+            user_id: userId,
+            date,
+            slot_id: slotId,
+            subject_id: subjectId,
+            subject_name: subjectName,
+            status,
+            notes: notes || null,
+            updated_at: new Date().toISOString(),
+          });
+          if (error) {
+            console.warn('Supabase student_attendance upsert error:', error);
+          }
+        } catch (err) {
+          console.warn('Could not sync session attendance to Supabase:', err);
+        }
       }
     }
   }
