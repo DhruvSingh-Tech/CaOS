@@ -13,6 +13,9 @@ import {
   ExternalLink,
   GraduationCap,
   Users,
+  Pencil,
+  Save,
+  X,
 } from 'lucide-react';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
@@ -33,6 +36,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     signInWithGoogle,
     signOut,
     updateUserLabGroup,
+    updateUserProfile,
   } = useAuth();
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'magic_link'>('signin');
@@ -46,7 +50,42 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Profile Edit State
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editName, setEditName] = useState(user?.name || '');
+  const [editRollNo, setEditRollNo] = useState(user?.rollNo || '');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  React.useEffect(() => {
+    if (user) {
+      setEditName(user.name);
+      setEditRollNo(user.rollNo || '');
+    }
+  }, [user]);
+
   if (!isOpen) return null;
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editName.trim()) {
+      setErrorMessage('Full name cannot be blank.');
+      return;
+    }
+    setIsSavingProfile(true);
+    setErrorMessage(null);
+    const { error } = await updateUserProfile({
+      name: editName.trim(),
+      rollNo: editRollNo.trim(),
+    });
+    setIsSavingProfile(false);
+    if (error) {
+      setErrorMessage(error.message || 'Failed to update profile.');
+    } else {
+      setIsEditingProfile(false);
+      setSuccessMessage('Profile and Roll Number updated successfully!');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
@@ -137,6 +176,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </div>
           )}
 
+          {/* User Header */}
           <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-white text-xs">
@@ -147,21 +187,122 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <span className="text-zinc-400 font-mono text-[11px]">{user.email}</span>
               </div>
             </div>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-zinc-800 text-zinc-300 border border-zinc-700">
-              {user.role}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-zinc-800 text-zinc-300 border border-zinc-700">
+                {user.role}
+              </span>
+              {!isEditingProfile && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditingProfile(true)}
+                  className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 transition-all cursor-pointer"
+                  title="Edit details"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-950 space-y-2 font-mono">
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Class Batch:</span>
-              <span className="text-white font-semibold">{user.classBatch}</span>
+          {/* Edit Form OR View Details */}
+          {isEditingProfile ? (
+            <form onSubmit={handleSaveProfile} className="p-4 rounded-xl border border-blue-900/60 bg-blue-950/20 space-y-3.5 animate-fade-in">
+              <div className="flex items-center justify-between pb-1.5 border-b border-blue-900/40">
+                <span className="text-xs font-bold text-blue-300 flex items-center gap-1.5">
+                  <Pencil className="h-3.5 w-3.5 text-blue-400" />
+                  Edit Student Information
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditingProfile(false);
+                    setEditName(user.name);
+                    setEditRollNo(user.rollNo || '');
+                  }}
+                  className="text-zinc-400 hover:text-white cursor-pointer p-0.5"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-zinc-300 font-medium mb-1">Full Student Name</label>
+                <Input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="e.g. Rahul Sharma"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-zinc-300 font-medium mb-1">College Roll Number</label>
+                <Input
+                  type="text"
+                  value={editRollNo}
+                  onChange={(e) => setEditRollNo(e.target.value)}
+                  placeholder="e.g. 04519011926"
+                />
+                <span className="text-[10px] text-zinc-400 mt-1 block">
+                  Add or update your official GGSIPU roll number for attendance reports & class records.
+                </span>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsEditingProfile(false);
+                    setEditName(user.name);
+                    setEditRollNo(user.rollNo || '');
+                  }}
+                  disabled={isSavingProfile}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="default"
+                  size="sm"
+                  isLoading={isSavingProfile}
+                  className="font-bold bg-blue-600 hover:bg-blue-500 text-white"
+                >
+                  <Save className="h-3.5 w-3.5 mr-1" />
+                  Save Changes
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-950 space-y-2.5 font-mono">
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-400">Class Batch:</span>
+                <span className="text-white font-semibold">{user.classBatch}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-400">Roll Number:</span>
+                <div className="flex items-center gap-2">
+                  <span className={`font-semibold ${user.rollNo ? 'text-white' : 'text-amber-400 italic'}`}>
+                    {user.rollNo || 'Not set'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditName(user.name);
+                      setEditRollNo(user.rollNo || '');
+                      setIsEditingProfile(true);
+                    }}
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-[10px] font-sans transition-all cursor-pointer border border-zinc-700"
+                  >
+                    <Pencil className="h-2.5 w-2.5" />
+                    <span>{user.rollNo ? 'Edit' : 'Add Roll No'}</span>
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-400">Roll Number:</span>
-              <span className="text-white">{user.rollNo || 'N/A'}</span>
-            </div>
-          </div>
+          )}
 
           {/* Assigned Lab Group Switcher */}
           <div className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-900/60 space-y-2">

@@ -22,6 +22,11 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updateUserRole: (userId: string, newRole: UserRole) => Promise<{ error?: any }>;
   updateUserLabGroup: (labGroup: 'Group B2-A' | 'Group B2-B' | 'all') => Promise<{ error?: any }>;
+  updateUserProfile: (updates: {
+    name?: string;
+    rollNo?: string;
+    labGroup?: 'Group B2-A' | 'Group B2-B' | 'all';
+  }) => Promise<{ error?: any }>;
   refreshRoster: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -359,6 +364,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   };
 
+  // Student / CR / Admin: Update profile details (Name, Roll Number, Lab Group)
+  const updateUserProfile = async (updates: {
+    name?: string;
+    rollNo?: string;
+    labGroup?: 'Group B2-A' | 'Group B2-B' | 'all';
+  }) => {
+    if (!user) return { error: new Error('User not logged in') };
+
+    const updatedUser: UserProfile = {
+      ...user,
+      ...(updates.name ? { name: updates.name } : {}),
+      ...(updates.rollNo !== undefined ? { rollNo: updates.rollNo } : {}),
+      ...(updates.labGroup ? { labGroup: updates.labGroup } : {}),
+    };
+
+    setUser(updatedUser);
+
+    if (updates.labGroup && typeof window !== 'undefined') {
+      localStorage.setItem('caos_user_lab_group', updates.labGroup);
+    }
+
+    if (supabase && user.id) {
+      try {
+        const payload: any = { updated_at: new Date().toISOString() };
+        if (updates.name) payload.name = updates.name;
+        if (updates.rollNo !== undefined) payload.roll_no = updates.rollNo;
+        if (updates.labGroup) payload.lab_group = updates.labGroup;
+
+        const { error } = await supabase
+          .from('user_profiles')
+          .update(payload)
+          .eq('id', user.id);
+
+        if (error) throw error;
+        await refreshRoster();
+      } catch (err: any) {
+        console.warn('Could not sync profile updates to Supabase:', err);
+        return { error: err };
+      }
+    }
+
+    return {};
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -374,6 +423,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         updateUserRole,
         updateUserLabGroup,
+        updateUserProfile,
         refreshRoster,
         refreshProfile,
       }}
