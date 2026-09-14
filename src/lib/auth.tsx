@@ -199,10 +199,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Magic link login
   const signInWithOtp = async (email: string) => {
     if (!supabase) return { error: new Error('Supabase is not configured') };
+    const redirectUrl =
+      typeof window !== 'undefined' && window.location.origin.includes('localhost')
+        ? window.location.origin
+        : 'https://caos-edu.vercel.app';
+
     const res = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+        emailRedirectTo: redirectUrl,
       },
     });
     return res;
@@ -224,10 +229,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     labGroup: 'Group B2-A' | 'Group B2-B' | 'all' = 'Group B2-A'
   ) => {
     if (!supabase) return { error: new Error('Supabase is not configured') };
+    const redirectUrl =
+      typeof window !== 'undefined' && window.location.origin.includes('localhost')
+        ? window.location.origin
+        : 'https://caos-edu.vercel.app';
+
     const res = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: redirectUrl,
         data: { name, roll_no: rollNo, lab_group: labGroup },
       },
     });
@@ -264,10 +275,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Google OAuth
   const signInWithGoogle = async () => {
     if (!supabase) return { error: new Error('Supabase is not configured') };
+    const redirectUrl =
+      typeof window !== 'undefined' && window.location.origin.includes('localhost')
+        ? window.location.origin
+        : 'https://caos-edu.vercel.app';
+
     const res = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+        redirectTo: redirectUrl,
       },
     });
     return res;

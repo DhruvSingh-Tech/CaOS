@@ -58,7 +58,7 @@ export function NotesRepositoryView({
   currentRole,
 }: NotesRepositoryViewProps) {
   const { user } = useAuth();
-  const isCRorAdmin = user?.role === 'cr' || user?.role === 'admin';
+  const isCRorAdmin = user?.role === 'cr' || user?.role === 'admin' || currentRole === 'cr' || currentRole === 'admin';
 
   const [activeTab, setActiveTab] = useState<'explorer' | 'curated'>('explorer');
   const [driveHub, setDriveHub] = useState<DriveHubConfig>(dataService.getDriveHubConfig());
@@ -168,7 +168,7 @@ export function NotesRepositoryView({
 
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle) return;
+    if (!newTitle || !isCRorAdmin) return;
 
     setIsUploading(true);
     let uploadedUrl = newDriveUrl.trim() || driveHub.rootFolderUrl;
@@ -340,7 +340,7 @@ export function NotesRepositoryView({
             <ArrowUpRight className="h-3.5 w-3.5 ml-1 text-zinc-400" />
           </a>
 
-          {user && (
+          {isCRorAdmin && (
             <Button
               variant="default"
               size="sm"
@@ -739,7 +739,7 @@ export function NotesRepositoryView({
       )}
 
       {/* Add New Resource / Google Drive Link Modal */}
-      {user && (
+      {isCRorAdmin && (
         <Modal
           isOpen={isUploadOpen}
           onClose={() => setIsUploadOpen(false)}
